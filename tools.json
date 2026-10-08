@@ -1,0 +1,2590 @@
+{
+  "$schema": "https://raw.githubusercontent.com/warOnSaaS/suite/main/packages/tools/tools.schema.json",
+  "app": "sheets",
+  "version": 1,
+  "tools": [
+    {
+      "name": "sheets.list_sheets",
+      "title": "List spreadsheets",
+      "description": "The team's spreadsheets, most recently changed first. q narrows by words in the title.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Words in the title"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "sheets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "sheets"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.create_sheet",
+      "title": "New spreadsheet",
+      "description": "Make a spreadsheet. Give tabs to name them, values to fill the first tab (rows of cells, typed as a person would: \"$1,200\", \"=SUM(B2:B9)\"), or template to start from an example: pipeline (Deals by stage with weighted value, a summary by stage and a chart); budget (Monthly income and costs with totals, net and a chart); hiring (Candidates by role and stage, with a pivot table of the pipeline).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "tabs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "description": "Tab names, left to right"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "description": "Rows of cells for the first tab, from A1"
+          },
+          "template": {
+            "type": "string",
+            "enum": [
+              "pipeline",
+              "budget",
+              "hiring"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.get_sheet",
+      "title": "Open a spreadsheet",
+      "description": "One spreadsheet: its tabs (with the range in use, frozen rows, filter and any CRM or pivot link), charts, open comments, sharing and address. Read cells with sheets.read_range.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.rename_sheet",
+      "title": "Rename a spreadsheet",
+      "description": "Change a spreadsheet's title.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "sheet",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.copy_sheet",
+      "title": "Make a copy",
+      "description": "Copy a spreadsheet with everything in it (tabs, formulas, formats, charts, comments) into your workspace. Give sheet for one of the team's, or share_token for one someone shared with a view-only link. The copy is not shared.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "share_token": {
+            "type": "string",
+            "description": "The token at the end of a view-only link (/v/<token>)"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_sheet",
+      "title": "Delete a spreadsheet",
+      "description": "Delete a spreadsheet for everyone on the team. It disappears from the list and its share link stops working. An agent calling this asks a person first.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "delete",
+      "confirm": "human",
+      "emits": [
+        "sheets.workbook.deleted"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.read_range",
+      "title": "Read cells",
+      "description": "Exact cell contents: values (numbers stay numbers, errors are their code like #DIV/0!) and, where a cell has one, its formula. Leave range out to read everything in use on the tab. text: true adds what each cell shows (formatted, like $1,200.00); formats: true adds each cell's format. version reads an earlier version (sheets.list_versions).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "A1 notation: B3, A1:D20, A:C (whole columns), 2:5 (whole rows), or 'Tab name'!A1:B9"
+          },
+          "text": {
+            "type": "boolean"
+          },
+          "formats": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "string",
+            "description": "A version id, to read the spreadsheet as it was then"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.write_range",
+      "title": "Write cells",
+      "description": "Write rows of cells starting at the top-left of range. Cells are read as a person typing them: \"1200\" and \"$1,200\" are numbers, \"12%\" is 0.12, \"2026-10-07\" is a date, \"=SUM(B2:B9)\" is a formula, \"'007\" stays text. input: \"raw\" stores strings exactly as text instead; \"exact\" stores contents as Sheets keeps them (what sheets.read_range formulas and values give back: a formula starts with =, text starting with ' shows without it), for copying cells exactly. null clears a cell. Returns the values the cells came to, and any formula errors.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "Where to start (default A1), or the whole range"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "input": {
+            "type": "string",
+            "enum": [
+              "user",
+              "raw",
+              "exact"
+            ]
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "b": {
+                            "type": "boolean"
+                          },
+                          "i": {
+                            "type": "boolean"
+                          },
+                          "u": {
+                            "type": "boolean"
+                          },
+                          "s": {
+                            "type": "boolean"
+                          },
+                          "fc": {
+                            "type": "string"
+                          },
+                          "bg": {
+                            "type": "string"
+                          },
+                          "ha": {
+                            "type": "string",
+                            "enum": [
+                              "left",
+                              "center",
+                              "right"
+                            ]
+                          },
+                          "va": {
+                            "type": "string",
+                            "enum": [
+                              "top",
+                              "middle",
+                              "bottom"
+                            ]
+                          },
+                          "wrap": {
+                            "type": "boolean"
+                          },
+                          "nf": {
+                            "type": "string"
+                          },
+                          "fs": {
+                            "type": "number"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "description": "Formats for the same cells: b, i, u, s, fc (text colour), bg (fill), ha (align), wrap, nf (number format code), fs (size). null clears."
+          }
+        },
+        "required": [
+          "sheet",
+          "values"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.set_formula",
+      "title": "Set a formula",
+      "description": "Put a formula in a cell, like =SUMIF(B2:B20,\"Won\",C2:C20). fill copies it across a range the way dragging the fill handle does: relative references move, $absolute ones stay (fill: \"D2:D20\" from cell D2). Checks the formula first and returns what it came to.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "cell": {
+            "type": "string",
+            "description": "The cell, like D2"
+          },
+          "formula": {
+            "type": "string",
+            "description": "The formula, with or without the leading ="
+          },
+          "fill": {
+            "type": "string",
+            "description": "A range that includes the cell, to fill the formula into"
+          }
+        },
+        "required": [
+          "sheet",
+          "cell",
+          "formula"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.append_rows",
+      "title": "Add rows",
+      "description": "Add rows under the last row in use (or under the table that starts at range, like A1). Cells are read as typed, as in sheets.write_range.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "range": {
+            "type": "string",
+            "description": "The table's first cell or range, when the tab holds more than one table"
+          },
+          "input": {
+            "type": "string",
+            "enum": [
+              "user",
+              "raw"
+            ]
+          }
+        },
+        "required": [
+          "sheet",
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.clear_range",
+      "title": "Clear cells",
+      "description": "Empty a range: what: values (default), formats or all.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "A1 notation: B3, A1:D20, A:C (whole columns), 2:5 (whole rows), or 'Tab name'!A1:B9"
+          },
+          "what": {
+            "type": "string",
+            "enum": [
+              "values",
+              "formats",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "sheet",
+          "range"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.find",
+      "title": "Find",
+      "description": "Find cells by what they show (or by their formula, with formulas: true), across every tab or one. Returns each match's tab, cell, value and formula.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "query": {
+            "type": "string"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "match_case": {
+            "type": "boolean"
+          },
+          "whole_cell": {
+            "type": "boolean"
+          },
+          "formulas": {
+            "type": "boolean"
+          },
+          "regex": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [
+          "sheet",
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.sort",
+      "title": "Sort",
+      "description": "Sort the rows of a range (default: everything in use) by one or more columns. A header row is kept on top (found automatically; header: true or false to say). Formulas in moved rows keep pointing at their own row, as in Excel. Empty cells go last.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "A1 notation: B3, A1:D20, A:C (whole columns), 2:5 (whole rows), or 'Tab name'!A1:B9"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "column": {
+                    "type": [
+                      "string",
+                      "number"
+                    ],
+                    "description": "A letter (C), a header from the first row (\"Amount\"), or a number counting from 1 within the range"
+                  },
+                  "order": {
+                    "type": "string",
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ]
+                  }
+                },
+                "required": [
+                  "column"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "column": {
+                      "type": [
+                        "string",
+                        "number"
+                      ],
+                      "description": "A letter (C), a header from the first row (\"Amount\"), or a number counting from 1 within the range"
+                    },
+                    "order": {
+                      "type": "string",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "column"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "header": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet",
+          "by"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.filter",
+      "title": "Filter",
+      "description": "Turn on the tab's filter (everyone sees it, as in Google Sheets) and set a condition on one column; rows that do not match are hidden. Call again for more columns. clear: true removes the filter. Returns the rows that still show. To look without changing what others see, use sheets.read_range or sheets.find.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "The table, header row first (default: everything in use)"
+          },
+          "column": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "A letter or a header"
+          },
+          "condition": {
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
+                "enum": [
+                  "eq",
+                  "neq",
+                  "gt",
+                  "gte",
+                  "lt",
+                  "lte",
+                  "contains",
+                  "not_contains",
+                  "starts_with",
+                  "empty",
+                  "not_empty",
+                  "in",
+                  "all"
+                ],
+                "description": "eq, neq, gt, gte, lt, lte, contains, not_contains, starts_with, empty, not_empty, in (with values), or all (no condition)"
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ]
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "null"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "op"
+            ],
+            "additionalProperties": false
+          },
+          "clear": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.insert_rows",
+      "title": "Insert rows",
+      "description": "Insert rows before row at (counting from 1). Every formula that points past them moves.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_rows",
+      "title": "Delete rows",
+      "description": "Delete rows starting at row at (counting from 1). Every formula that points past them moves; one that pointed into them shows #REF!.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.insert_columns",
+      "title": "Insert columns",
+      "description": "Insert columns before column at (counting from 1, or a letter). Every formula that points past them moves.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_columns",
+      "title": "Delete columns",
+      "description": "Delete columns starting at column at (counting from 1, or a letter). Every formula that points past them moves; one that pointed into them shows #REF!.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.format_range",
+      "title": "Format cells",
+      "description": "Format a range: bold, italic, underline, strike, color and fill (#rrggbb), align (left, center, right), valign, wrap, font_size, number_format (auto, number, integer, currency, currency0, percent, date, date_us, datetime, text, or an Excel format code like \"$#,##0.00\" or \"0.0%\"). false or null turns one off; clear: true removes all formatting.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "A1 notation: B3, A1:D20, A:C (whole columns), 2:5 (whole rows), or 'Tab name'!A1:B9"
+          },
+          "bold": {
+            "type": "boolean"
+          },
+          "italic": {
+            "type": "boolean"
+          },
+          "underline": {
+            "type": "boolean"
+          },
+          "strike": {
+            "type": "boolean"
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fill": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "valign": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "top",
+                  "middle",
+                  "bottom"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wrap": {
+            "type": "boolean"
+          },
+          "font_size": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 6,
+                "maximum": 48
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "number_format": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "clear": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet",
+          "range"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.set_column_width",
+      "title": "Column width",
+      "description": "Set the width of columns in pixels (24 to 800), like columns: \"B\" or \"B:D\". width: null goes back to the default.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "columns": {
+            "type": "string"
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "sheet",
+          "columns",
+          "width"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.freeze",
+      "title": "Freeze rows and columns",
+      "description": "Keep the top rows and left columns in view while scrolling. 0 unfreezes.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "columns": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 26
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.add_sheet_tab",
+      "title": "Add a tab",
+      "description": "Add a tab to a spreadsheet, at the end or at index (0 is first).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.rename_tab",
+      "title": "Rename a tab",
+      "description": "Rename a tab. Formulas on other tabs that point at it are rewritten to the new name.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "sheet",
+          "tab",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.move_tab",
+      "title": "Move a tab",
+      "description": "Move a tab to a new place (index 0 is first).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "sheet",
+          "tab",
+          "index"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_tab",
+      "title": "Delete a tab",
+      "description": "Delete a tab and everything on it. Formulas elsewhere that pointed at it show #REF!. Version history keeps the old tab (sheets.restore_version).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "tab"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "delete",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.create_chart",
+      "title": "Add a chart",
+      "description": "A chart from a range, drawn on the tab and kept up to date. type: column, bar, line, area, pie, scatter. By columns (default) the first column is the labels and each other column a series named by its header; series_by: \"rows\" turns that around. series picks which columns (letters) or rows (numbers) to plot. at is the cell where its top-left corner sits. Returns the chart with the data it shows.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "range": {
+            "type": "string",
+            "description": "A1 notation: B3, A1:D20, A:C (whole columns), 2:5 (whole rows), or 'Tab name'!A1:B9"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "column",
+              "bar",
+              "line",
+              "area",
+              "pie",
+              "scatter"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "at": {
+            "type": "string"
+          },
+          "stacked": {
+            "type": "boolean"
+          },
+          "series_by": {
+            "type": "string",
+            "enum": [
+              "columns",
+              "rows"
+            ]
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            }
+          }
+        },
+        "required": [
+          "sheet",
+          "range"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.update_chart",
+      "title": "Change a chart",
+      "description": "Change a chart's type, range, title, series, place (at) or size (width and height in pixels).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "chart": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "column",
+              "bar",
+              "line",
+              "area",
+              "pie",
+              "scatter"
+            ]
+          },
+          "range": {
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string"
+          },
+          "stacked": {
+            "type": "boolean"
+          },
+          "series_by": {
+            "type": "string",
+            "enum": [
+              "columns",
+              "rows"
+            ]
+          },
+          "series": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "sheet",
+          "chart"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_chart",
+      "title": "Delete a chart",
+      "description": "Remove a chart. Its data stays.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "chart": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "chart"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.list_charts",
+      "title": "List charts",
+      "description": "The charts in a spreadsheet (or on one tab), each with the labels and numbers it shows right now.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.create_pivot",
+      "title": "Pivot table",
+      "description": "Summarise a table on a new tab: one row per value of rows (a header or letter), optional columns to split across, and values to work out (summarize: sum, count, average, min, max of a field). It is written as live formulas (SUMIFS, COUNTIFS, ...), so it updates as the table changes and opens in Excel. sheets.refresh_link picks up new categories.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "The tab with the table"
+          },
+          "range": {
+            "type": "string",
+            "description": "The table, header row first (default: everything in use)"
+          },
+          "rows": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "columns": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "summarize": {
+                  "type": "string",
+                  "enum": [
+                    "sum",
+                    "count",
+                    "average",
+                    "min",
+                    "max"
+                  ]
+                }
+              },
+              "required": [
+                "summarize"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "target": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Name for the new tab"
+          }
+        },
+        "required": [
+          "sheet",
+          "rows"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.list_comments",
+      "title": "Comments",
+      "description": "Open comments (include_resolved: true for all), with the cell each is on and its replies.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "include_resolved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.add_comment",
+      "title": "Comment on a cell",
+      "description": "Add a comment to a cell.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "cell": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "cell",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed",
+        "sheets.comment.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.reply_comment",
+      "title": "Reply to a comment",
+      "description": "Reply in a comment's thread.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5000
+          }
+        },
+        "required": [
+          "sheet",
+          "comment",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed",
+        "sheets.comment.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.resolve_comment",
+      "title": "Resolve a comment",
+      "description": "Mark a comment done (resolved: false opens it again).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet",
+          "comment"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.delete_comment",
+      "title": "Delete a comment",
+      "description": "Delete a comment and its replies (your own, or anyone's if you are an admin).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "comment"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.import_xlsx",
+      "title": "Import an Excel file",
+      "description": "Bring in an .xlsx file (as base64) as a new spreadsheet: values, formulas, formats, frozen panes, widths, notes and named ranges. Returns an honest report: what carried over, what did not (merged cells, conditional formatting, charts, macros, ...), and every formula whose result differs from what the file saved.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "content_base64": {
+            "type": "string",
+            "description": "The .xlsx file, base64"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "name": {
+            "type": "string",
+            "description": "The file name, used as the title when there is none"
+          }
+        },
+        "required": [
+          "content_base64"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.import_csv",
+      "title": "Import CSV",
+      "description": "Bring in CSV text (or base64). With sheet, it goes on a new tab of that spreadsheet (or replaces tab); without, it becomes a new spreadsheet. Numbers, money, percents and dates are read as such. The delimiter (comma, semicolon or tab) is found automatically.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The CSV text"
+          },
+          "content_base64": {
+            "type": "string"
+          },
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string",
+            "description": "Replace this tab's contents"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Name for the new tab or spreadsheet"
+          },
+          "delimiter": {
+            "type": "string",
+            "enum": [
+              ",",
+              ";",
+              "\t"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.export",
+      "title": "Download",
+      "description": "Download a spreadsheet as .xlsx (every tab, with formulas and their results, formats, frozen panes and comments as notes) or one tab as .csv (what the cells show; values: \"raw\" for plain numbers). Returns a download link; content: true also returns the file as base64. Says what an .xlsx cannot carry (charts, for now).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "xlsx",
+              "csv"
+            ]
+          },
+          "tab": {
+            "type": "string",
+            "description": "A tab, by name or id (default: the first tab). A range like 'Deals'!A1:C9 names its own tab."
+          },
+          "values": {
+            "type": "string",
+            "enum": [
+              "formatted",
+              "raw"
+            ]
+          },
+          "content": {
+            "type": "boolean",
+            "description": "Also return the file as base64"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.export_data",
+      "title": "Export everything",
+      "description": "Every spreadsheet on the team in one zip: each as .xlsx, plus sheets.json with every tab, cell, format, chart and comment exactly as stored. Your data is never stuck here.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "size": {
+                "type": "number"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "size",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "counts": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "file",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "admin",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.import_from_crm",
+      "title": "Pull from the CRM",
+      "description": "Pull CRM records onto a tab, kept linked so sheets.refresh_link brings it up to date. kind: deals, contacts, leads, organizations, activities (with the usual fields), or soql for any read-only query, like SELECT Name, StageName, Amount FROM Opportunity WHERE StageName != 'Lost'. Uses the CRM's own tools (crm.query), as you. Formulas beside the table keep working after a refresh.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "deals",
+              "contacts",
+              "leads",
+              "organizations",
+              "activities"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "CRM field names, like Name, Amount, CloseDate, Account.Name"
+          },
+          "where": {
+            "type": "string",
+            "description": "A SOQL condition, like Amount > 5000"
+          },
+          "soql": {
+            "type": "string"
+          },
+          "tab": {
+            "type": "string",
+            "description": "Replace this tab instead of adding one"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Name for the new tab"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.refresh_link",
+      "title": "Refresh",
+      "description": "Bring a linked tab up to date: a CRM tab pulls its records again; a pivot tab is rebuilt from its table (new categories appear). Without tab, every linked tab in the spreadsheet.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed",
+        "sheets.link.refreshed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.connect_crm",
+      "title": "Connect the CRM",
+      "description": "Standalone servers: where the wOS CRM is (its address) and an access token from it (crm.create_access_token, read only is enough). disconnect: true forgets it. Inside the wOS suite nothing is needed: Sheets uses the CRM app directly.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "token": {
+            "type": "string"
+          },
+          "disconnect": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "admin",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.share",
+      "title": "Share a link",
+      "description": "link: \"view\" makes a read-only link anyone can open without an account (it shows values and charts, never lets them edit). link: \"off\" stops it. Everyone on the team can already open and edit every spreadsheet. An agent turning a link on asks a person first.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "link": {
+            "type": "string",
+            "enum": [
+              "view",
+              "off"
+            ]
+          }
+        },
+        "required": [
+          "sheet",
+          "link"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "human",
+      "emits": [
+        "sheets.workbook.shared"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.list_versions",
+      "title": "Version history",
+      "description": "Earlier versions of a spreadsheet, newest first: one is kept automatically every ten minutes of editing, plus every named version. Read one with sheets.read_range version, or bring it back with sheets.restore_version.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.save_version",
+      "title": "Name this version",
+      "description": "Save the spreadsheet as it is now, with a name, so it is easy to find in the history.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "sheet",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.version.saved"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.restore_version",
+      "title": "Restore a version",
+      "description": "Bring back an earlier version for everyone. Nothing is lost: the version before the restore is saved first, so it can be restored too.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "sheets.workbook.changed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.sync",
+      "title": "Catch up",
+      "description": "For screens: the changes to a spreadsheet that a copy at state_vector (base64 Yjs state vector; empty for everything) has not seen, as one base64 Yjs update. Agents use sheets.read_range instead.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "state_vector": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/server.test.mjs"
+    },
+    {
+      "name": "sheets.set_presence",
+      "title": "Show where I am",
+      "description": "For screens: tell others with the spreadsheet open which cell you are on. Nothing is stored.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The spreadsheet: its id (wb_...) or its exact title"
+          },
+          "tab": {
+            "type": "string"
+          },
+          "cell": {
+            "type": "string"
+          },
+          "left": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "sheet"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [
+        "sheets.presence.changed"
+      ],
+      "test": "test/server.test.mjs"
+    },
+    {
+      "name": "sheets.list_people",
+      "title": "People",
+      "description": "Everyone on the team. me is you.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.add_person",
+      "title": "Add someone",
+      "description": "Let someone sign in and edit the team's spreadsheets: by email (for the email link or the warOnSaaS account), by GitHub username, or both.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "github": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "member"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "admin",
+      "confirm": "none",
+      "emits": [
+        "sheets.person.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.remove_person",
+      "title": "Remove someone",
+      "description": "Take someone off the team: they are signed out everywhere. What they wrote stays. An agent calling this asks a person first.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "type": "string",
+            "description": "Name, email or GitHub username"
+          }
+        },
+        "required": [
+          "person"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "admin",
+      "confirm": "human",
+      "emits": [
+        "sheets.person.removed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.get_settings",
+      "title": "Settings",
+      "description": "You, your preferences, the team, where data is stored, how sign-in works, the CRM connection and the address to connect an AI.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.set_preferences",
+      "title": "Preferences",
+      "description": "Your own preferences: theme (auto, light or dark).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "light",
+              "dark"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.list_approvals",
+      "title": "Waiting for your yes",
+      "description": "Things an agent asked to do that need your yes first (deleting a spreadsheet, turning on a public link, removing someone).",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "sheets.decide_approval",
+      "title": "Approve or decline",
+      "description": "Say yes or no to something an agent asked to do. Yes runs it as you. Only a person in the app can answer.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "approval": {
+            "type": "string"
+          },
+          "approve": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approval",
+          "approve"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    }
+  ]
+}

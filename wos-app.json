@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/warOnSaaS/suite/main/packages/manifest/wos-app.schema.json",
+  "id": "sheets",
+  "name": "Sheets",
+  "description": "Spreadsheets with formulas, tabs, charts, comments and editing together. Your own AI works in them through the same tools.",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-only",
+  "requires": { "core": ">=0.1" },
+  "tools": "./tools.json",
+  "tables": "./migrations",
+  "server": "./server.mjs",
+  "screens": "./screens.mjs",
+  "icon": "grid",
+  "nav": { "label": "Sheets", "order": 45 },
+  "events": {
+    "emits": ["sheets.workbook.created", "sheets.workbook.changed", "sheets.workbook.deleted", "sheets.workbook.shared", "sheets.comment.added", "sheets.version.saved", "sheets.link.refreshed", "sheets.presence.changed", "sheets.approval.requested", "sheets.person.added", "sheets.person.removed"],
+    "listens": []
+  },
+  "needs": {
+    "services": [],
+    "permissions": [],
+    "desktop": [],
+    "env": ["CRM_URL", "CRM_TOKEN", "OAUTH_SECRET"]
+  },
+  "data": { "onDisable": "keep", "exports": ["workbooks", "versions", "people"] }
+}
