@@ -82,7 +82,9 @@ body.gate{display:grid;place-items:center;min-height:100svh;padding:20px;box-siz
 .ct-logo{position:relative;display:grid;place-items:center;width:46px;height:46px;flex:none;border-radius:calc(var(--ui-radius) + 2px);background:var(--ui-surface-2);box-shadow:inset 0 0 0 1px var(--ui-line)}
 .ct-logo svg{width:24px;height:24px}
 .ct-term{position:absolute;right:-6px;bottom:-6px;font:600 10px/1 var(--ui-mono);font-style:normal;padding:3px 4px;border-radius:5px;background:var(--ui-ink);color:var(--ui-bg)}
-.ct-act .ui-btn.is-lg{width:100%}
+.ct-act{min-width:0;max-width:100%}
+.ct-act .ui-btn.is-lg{width:100%;box-sizing:border-box}
+.ct-cmd{max-width:100%;box-sizing:border-box}
 .ct-hint{margin:0;font-size:13px;color:var(--ui-ink-3)}
 .ct-cmd{display:flex;align-items:center;gap:var(--ui-s2);padding:8px 8px 8px 12px;background:var(--ui-surface-2);border:1px solid var(--ui-line);border-radius:var(--ui-radius-sm);min-width:0}
 .ct-cmd code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font:500 12.5px/1.5 var(--ui-mono);scrollbar-width:none}
@@ -105,7 +107,7 @@ body.gate{display:grid;place-items:center;min-height:100svh;padding:20px;box-siz
 /* ---------- the editor ---------- */
 .ed{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--ui-bg)}
 .ed-top{display:flex;align-items:center;gap:var(--ui-s2);padding:8px 12px 6px;min-width:0}
-.ed-brand{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ui-ink);color:var(--ui-bg);flex:none}
+.sheets-root a.ed-brand,.ed-brand{color:var(--ui-bg);display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--ui-ink);color:var(--ui-bg);flex:none}
 .ed-back{padding:0 6px!important}
 .ed-title{flex:1;min-width:0}
 .ed-title input{width:100%;max-width:520px;box-sizing:border-box;font:inherit;font-family:var(--ui-display);font-size:17px;font-weight:var(--ui-weight-strong);color:var(--ui-ink);background:transparent;border:1px solid transparent;border-radius:var(--ui-radius-sm);padding:4px 8px;text-overflow:ellipsis}
