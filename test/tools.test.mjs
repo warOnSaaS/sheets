@@ -249,3 +249,11 @@ test('every tool in the catalogue was called', () => {
   const missing = listTools().map((t) => t.name).filter((n) => !CALLED.has(n));
   assert.deepEqual(missing, []);
 });
+
+test('a chart over the label column with series picked by letter keeps its header and labels', async () => {
+  const { sam, run } = await makeApp();
+  const s = await run(sam, 'sheets.create_sheet', { values: [['Deal', 'Stage', 'Amount', 'P', 'Weighted'], ['A', 'x', 10, 0.5, 5], ['B', 'y', 20, 0.5, 10]] });
+  const ch = await run(sam, 'sheets.create_chart', { sheet: s.id, range: 'A1:A3', series: ['C', 'E'] });
+  assert.deepEqual(ch.data.labels, ['A', 'B']);
+  assert.deepEqual(ch.data.series, [{ name: 'Amount', values: [10, 20] }, { name: 'Weighted', values: [5, 10] }]);
+});

@@ -10,3 +10,4 @@ instances/*.names
 .vercel/
 .venv/
 dist/
+.vercel
