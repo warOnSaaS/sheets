@@ -127,7 +127,7 @@ function importReport(ctx, out, csv, name) {
       ${r.carried?.length ? `<p class="ui-label">Carried over</p><ul class="rp-l is-ok">${r.carried.map((x) => `<li>${I.check}${h(x[0].toUpperCase() + x.slice(1))}</li>`).join('')}</ul>` : ''}
       ${r.dropped?.length ? `<p class="ui-label">Not carried over</p><ul class="rp-l">${r.dropped.map((d) => `<li>${I.x}<span>${h(d.what)} <b>${d.count}</b>${d.examples?.length ? `<small>${h(d.examples.join(', '))}</small>` : ''}</span></li>`).join('')}</ul>` : ''}
       ${r.formula_problems?.length ? `<p class="ui-label">Formulas to check</p><ul class="rp-l">${r.formula_problems.slice(0, 12).map((p) => `<li>${I.x}<span><code>${h(p.cell)}</code> ${h(p.problem)}<small>${h(p.formula)}</small></span></li>`).join('')}${r.formula_problems.length > 12 ? `<li>…and ${r.formula_problems.length - 12} more</li>` : ''}</ul>` : ''}`;
-  dialog(document.body, { title: 'Import report', body, cancel: null, submit: 'Open it', wide: true, onSubmit: () => { ctx.navigate(`/s/${out.sheet}`); } });
+  dialog(document.body, { title: 'Import report', body, cancel: 'Close', submit: 'Open it', toolName: 'sheets.get_sheet', wide: true, onSubmit: () => { ctx.navigate(`/s/${out.sheet}`); } });
 }
 
 function thumb(id) {

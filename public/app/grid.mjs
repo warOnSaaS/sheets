@@ -1196,7 +1196,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
   }
   function commentsPanel() {
     const list = allComments(S.doc).filter((c) => !c.resolved);
-    const d = dialog(document.body, { title: `Comments${list.length ? ` (${list.length})` : ''}`, cancel: null, submit: 'Done', wide: true, body: list.length ? `<div class="cm-list">${list.map((c) => `<div class="cm-wrap"><button type="button" class="cm-go" data-go="${c.id}" ${none('shows the cell')}>${h(findTab(S.doc, c.tab)?.name ?? '')}!${addr(c.r, c.c)}</button>${commentHtml(c)}</div>`).join('')}</div>` : '<p class="ui-empty">No open comments. Select a cell and press the comment button to add one.</p>' });
+    const d = dialog(document.body, { title: `Comments${list.length ? ` (${list.length})` : ''}`, cancel: null, submit: 'Done', wide: true, plain: true, body: list.length ? `<div class="cm-list">${list.map((c) => `<div class="cm-wrap"><button type="button" class="cm-go" data-go="${c.id}" ${none('shows the cell')}>${h(findTab(S.doc, c.tab)?.name ?? '')}!${addr(c.r, c.c)}</button>${commentHtml(c)}</div>`).join('')}</div>` : '<p class="ui-empty">No open comments. Select a cell and press the comment button to add one.</p>' });
     wireComment(d);
     d.addEventListener('click', (e) => {
       const go = e.target.closest('[data-go]');
@@ -1340,7 +1340,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
 
   async function historyPanel() {
     const out = await callTool('sheets.list_versions', {});
-    const d = dialog(document.body, { title: 'Version history', cancel: null, submit: 'Done', wide: true, body: `<form class="vh-save" ${tool('sheets.save_version')}><input class="ui-input" name="label" placeholder="Name this version, like Before the Q4 update" required maxlength="120"><button class="ui-btn is-quiet" type="submit">Save</button></form>
+    const d = dialog(document.body, { title: 'Version history', cancel: null, submit: 'Done', wide: true, plain: true, body: `<form class="vh-save" ${tool('sheets.save_version')}><input class="ui-input" name="label" placeholder="Name this version, like Before the Q4 update" required maxlength="120"><button class="ui-btn is-quiet" type="submit">Save</button></form>
       <div class="vh-list">${out.versions.map((v) => `<div class="vh-i"><div><b>${h(v.label ?? new Date(v.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</b><span>${h(v.created_by_name ?? '')}${v.created_by_name ? ' · ' : ''}${h(ago(v.created_at))}${v.auto ? ' · saved automatically' : ''}</span></div><button type="button" class="ui-btn is-ghost is-sm" data-peek="${v.id}" ${tool('sheets.read_range')}>Look</button><button type="button" class="ui-btn is-quiet is-sm" data-restore="${v.id}" ${tool('sheets.restore_version')}>Restore</button></div>`).join('')}</div><div class="vh-peek"></div>` });
     d.querySelector('.vh-save').addEventListener('submit', async (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -1379,7 +1379,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
 
   async function shareDialog() {
     const on = !!S.share;
-    const d = dialog(document.body, { title: 'Share', cancel: null, submit: 'Done', body: `<p>Everyone on your team can already open and edit this spreadsheet.</p>
+    const d = dialog(document.body, { title: 'Share', cancel: null, submit: 'Done', plain: true, body: `<p>Everyone on your team can already open and edit this spreadsheet.</p>
       <div class="sh-share"><div><b>View-only link</b><span>Anyone with the link can look, without an account. They cannot edit or see comments.</span></div>
       <button type="button" class="ui-btn ${on ? 'is-quiet' : 'is-accent'} is-sm" data-link="${on ? 'off' : 'view'}" ${tool('sheets.share')}>${on ? 'Turn off' : 'Turn on'}</button></div>
       ${on ? `<div class="ui-copy sh-url"><code>${h(S.share.url)}</code><button type="button" class="ui-btn is-quiet is-sm" data-copy="${h(S.share.url)}" ${none('copies the link')}>Copy</button></div>` : ''}` });

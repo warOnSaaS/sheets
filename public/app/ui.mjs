@@ -64,12 +64,14 @@ export function toast(msg, root = document.body) {
 
 // A dialog: a title, fields, and a form whose submit runs the tool named. onSubmit gets the form values;
 // returning false keeps it open. Escape or Cancel closes it.
-export function dialog(root, { title, body, toolName, submit = 'Save', cancel = 'Cancel', onSubmit, wide = false, footer = '' }) {
+export function dialog(root, { title, body, toolName, submit = 'Save', cancel = 'Cancel', onSubmit, wide = false, footer = '', plain = false }) {
   const d = document.createElement('dialog');
   d.className = `ui-dialog sh-dialog${wide ? ' is-wide' : ''}`;
-  d.innerHTML = `<form method="dialog" class="sh-dform" ${toolName ? tool(toolName) : none('closes the dialog')}><h3>${h(title)}</h3><div class="sh-dbody">${body}</div><div class="ui-dialog-a">${footer}${cancel ? `<button type="button" class="ui-btn is-quiet" data-close ${none('closes the dialog')}>${h(cancel)}</button>` : ''}${submit ? `<button type="submit" class="ui-btn is-accent">${h(submit)}</button>` : ''}</div></form>`;
+  // A plain dialog holds its own forms (comments, history), so it is not a form itself.
+  const wrap = plain ? 'div' : 'form';
+  d.innerHTML = `<${wrap} ${plain ? '' : 'method="dialog" '}class="sh-dform" ${plain ? '' : toolName ? tool(toolName) : none('closes the dialog')}><h3>${h(title)}</h3><div class="sh-dbody">${body}</div><div class="ui-dialog-a">${footer}${cancel ? `<button type="button" class="ui-btn is-quiet" data-close ${none('closes the dialog')}>${h(cancel)}</button>` : ''}${submit ? (plain ? `<button type="button" class="ui-btn is-accent" data-close ${none('closes the dialog')}>${h(submit)}</button>` : `<button type="submit" class="ui-btn is-accent">${h(submit)}</button>`) : ''}</div></${wrap}>`;
   root.appendChild(d);
-  const form = d.querySelector('form');
+  const form = d.querySelector('.sh-dform');
   d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

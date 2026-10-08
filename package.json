@@ -14,7 +14,16 @@
   "main": "server.mjs",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "SHEETS_DEMO=1 node server.mjs"
+    "dev": "SHEETS_OPEN_SIGNUP=1 node server.mjs",
+    "build": "node scripts/build-screens.mjs",
+    "test": "node --test --test-timeout=180000 --test-concurrency=1 test/*.test.mjs",
+    "test:pg": "SHEETS_TEST_PG=${SHEETS_TEST_PG:-postgres://postgres:sheets@localhost:55497/sheets} node --test --test-timeout=180000 --test-concurrency=1 test/tools.test.mjs test/postgres.test.mjs",
+    "tools:json": "node scripts/tools-json.mjs",
+    "sync-kit": "node scripts/sync-kit.mjs",
+    "shots": "node scripts/shots.mjs",
+    "check:clean": "node scripts/check-clean.mjs",
+    "check:suite": "node scripts/suite-check.mjs",
+    "check": "node scripts/tools-json.mjs --check && node scripts/build-screens.mjs --check && node ~/wos-suite/packages/manifest/bin/check.mjs . && npm test && node scripts/check-clean.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
@@ -33,5 +42,10 @@
   "devDependencies": {
     "esbuild": "^0.28.2",
     "playwright": "^1.63.0"
+  },
+  "exports": {
+    ".": "./server.mjs",
+    "./tools.json": "./tools.json",
+    "./wos-app.json": "./wos-app.json"
   }
 }
