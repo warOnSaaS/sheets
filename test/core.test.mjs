@@ -85,3 +85,19 @@ test('the engine follows the document, including someone else\'s changes', () =>
   assert.equal(e2.value(sum, 0, 0), 400);
   e.destroy(); e2.destroy();
 });
+
+test('functions HyperFormula lacks or gets wrong work like Excel', () => {
+  const doc = new Y.Doc();
+  initBook(doc);
+  const t = needTab(doc).id;
+  const e = new Engine(doc);
+  const cases = [
+    ['=TEXT(58600,"#,##0")', '58,600'], ['=TEXT(0.256,"0.0%")', '25.6%'], ['=TEXT(DATE(2026,10,7),"mmm d, yyyy")', 'Oct 7, 2026'], ['=TEXT("abc","0")', 'abc'],
+    ['=DATEDIF(DATE(2026,1,1),DATE(2026,10,21),"m")', 9], ['=DATEDIF(DATE(2020,5,31),DATE(2026,3,1),"y")', 5], ['=DATEDIF(DATE(2026,1,31),DATE(2026,3,1),"md")', 1],
+    ['=DATEDIF(DATE(2025,11,15),DATE(2026,2,10),"yd")', 87], ['=DATEDIF(DATE(2020,5,31),DATE(2026,3,1),"ym")', 9],
+    ['=IF(TRUE,1,2)', 1], ['=REGEXMATCH("Acme Dental","Den")', true], ['=REGEXEXTRACT("inv-2041","\\d+")', '2041'],
+  ];
+  doc.transact(() => cases.forEach(([f], i) => setRaw(doc, t, i, 0, f)));
+  cases.forEach(([f, want], i) => assert.equal(e.value(t, i, 0), want, f));
+  e.destroy();
+});
