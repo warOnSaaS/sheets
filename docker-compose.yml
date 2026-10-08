@@ -1,0 +1,21 @@
+# Self-host wOS Sheets: docker compose up -d, then open http://localhost:3994
+# The first person to sign in owns the server and adds everyone else. Settings live in .env (see .env.example).
+services:
+  sheets:
+    build: .
+    image: wos-sheets
+    restart: unless-stopped
+    ports: ["3994:3994"]
+    env_file: [{ path: .env, required: false }]
+    environment:
+      DATABASE_URL: postgres://sheets:sheets@db:5432/sheets
+      OAUTH_SECRET: ${OAUTH_SECRET:-change-me-to-a-long-random-string}
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment: { POSTGRES_USER: sheets, POSTGRES_PASSWORD: sheets, POSTGRES_DB: sheets }
+    volumes: ["sheets-db:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U sheets"], interval: 5s, retries: 10 }
+volumes: { sheets-db: {} }
