@@ -13,6 +13,7 @@ const TEMPLATES = [
 
 export function mount(el, ctx) {
   el.classList.add('sheets-root');
+  if (!ctx.standalone) el.classList.add('in-suite');
   let current = null;
   let token = 0;
 
@@ -39,12 +40,12 @@ export default { title: 'Sheets', mount };
 
 function frame(ctx, active, body) {
   const nav = [['/', 'Spreadsheets', I.grid], ['/connect', 'Connect your AI', I.plug], ['/settings', 'Settings', I.gear]];
-  const link = (p) => (ctx.standalone ? `#${p}` : `#`);
+  const link = (p) => (ctx.standalone ? `#${p}` : `/a/sheets${p === '/' ? '' : p}`);
   return `<div class="pg">
   ${ctx.standalone ? `<header class="pg-top"><a class="pg-brand" href="#/"><span class="pg-mark">${I.grid}</span>Sheets</a>
     <nav class="pg-nav">${nav.map(([p, l, ic]) => `<a href="${link(p)}" data-nav="${p}"${active === p ? ' aria-current="page"' : ''}>${ic}<span>${h(l)}</span></a>`).join('')}</nav>
     <div class="pg-me"><span class="ui-avatar is-sm" title="${h(ctx.me?.name ?? '')}">${h(initials(ctx.me?.name))}</span><a class="ui-btn is-ghost is-sm" href="/logout">Sign out</a></div></header>`
-    : `<nav class="pg-nav is-inapp">${nav.map(([p, l, ic]) => `<a href="#" data-nav="${p}"${active === p ? ' aria-current="page"' : ''}>${ic}<span>${h(l)}</span></a>`).join('')}</nav>`}
+    : `<nav class="pg-nav is-inapp">${nav.map(([p, l, ic]) => `<a href="${link(p)}" data-nav="${p}"${active === p ? ' aria-current="page"' : ''}>${ic}<span>${h(l)}</span></a>`).join('')}</nav>`}
   <main class="ui-page pg-main">${body}</main></div>`;
 }
 
@@ -64,7 +65,7 @@ function homePage(el, ctx, alive) {
     <div class="ph-acts"><label class="ui-btn is-quiet" title="Import an .xlsx or .csv file">${I.upload}<span>Import</span><input type="file" class="sr-file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ${tool('sheets.import_xlsx')} aria-label="Import a file"></label>
     <button type="button" class="ui-btn is-accent" data-new="" ${tool('sheets.create_sheet')}>${I.plus}<span>New spreadsheet</span></button></div></div>
   <section class="hm-start" aria-label="Start from"><h2 class="ui-label">Start from</h2><div class="hm-tpl">${TEMPLATES.map((t) => `<button type="button" class="hm-t" data-new="${t.id ?? ''}" ${tool('sheets.create_sheet')}><span class="hm-thumb${t.id ? ` is-${t.id}` : ''}" aria-hidden="true">${thumb(t.id)}</span><b>${h(t.title)}</b><span>${h(t.about)}</span></button>`).join('')}</div></section>
-  <a class="hm-ai" href="${ctx.standalone ? '#/connect' : '#'}" data-go="/connect"><span class="hm-ai-ic">${I.plug}</span><span><b>Let your AI work in these sheets</b><span>Connect Claude, ChatGPT, Claude Code or Codex. It reads exact values and formulas, builds tables and charts. Your subscription, no credits here.</span></span><span class="hm-ai-go">Connect</span></a>
+  <a class="hm-ai" href="${ctx.standalone ? '#/connect' : '/a/sheets/connect'}" data-go="/connect"><span class="hm-ai-ic">${I.plug}</span><span><b>Let your AI work in these sheets</b><span>Connect Claude, ChatGPT, Claude Code or Codex. It reads exact values and formulas, builds tables and charts. Your subscription, no credits here.</span></span><span class="hm-ai-go">Connect</span></a>
   <section aria-label="All spreadsheets"><div class="hm-bar"><h2 class="ui-label">All spreadsheets</h2><form class="ui-search hm-q" role="search" ${tool('sheets.list_sheets')}>${I.search}<input name="q" placeholder="Search titles" aria-label="Search titles"></form></div>
   <div class="hm-list" aria-busy="true"><p class="ui-empty">Loading…</p></div></section>`);
   wireNav(el, ctx);
@@ -75,7 +76,7 @@ function homePage(el, ctx, alive) {
     if (!alive()) return;
     list.removeAttribute('aria-busy');
     if (!out.sheets.length) { list.innerHTML = `<div class="hm-empty">${q ? '<p>Nothing matches.</p>' : '<p><b>No spreadsheets yet.</b></p><p class="ui-hint">Start from one above, import a file, or ask your AI to make one.</p>'}</div>`; return; }
-    list.innerHTML = `<div class="ui-dtable-wrap"><table class="ui-dtable hm-t"><thead><tr><th>Title</th><th class="hm-when">Last change</th><th class="end"><span class="sr-only">Actions</span></th></tr></thead><tbody>${out.sheets.map((s) => `<tr><td><a class="hm-link" href="${ctx.standalone ? `#/s/${s.id}` : '#'}" data-go="/s/${s.id}"><span class="hm-ic">${I.grid}</span><span><b>${h(s.title)}</b>${s.shared ? ' <span class="ui-chip is-outline">Link on</span>' : ''}</span></a></td><td class="hm-when">${h(ago(s.updated_at))}</td><td class="end"><button type="button" class="ui-btn is-ghost is-sm" data-row="${s.id}" ${none('opens the menu for this spreadsheet')} aria-label="More for ${h(s.title)}">${I.more}</button></td></tr>`).join('')}</tbody></table></div>`;
+    list.innerHTML = `<div class="ui-dtable-wrap"><table class="ui-dtable hm-t"><thead><tr><th>Title</th><th class="hm-when">Last change</th><th class="end"><span class="sr-only">Actions</span></th></tr></thead><tbody>${out.sheets.map((s) => `<tr><td><a class="hm-link" href="${ctx.standalone ? `#/s/${s.id}` : `/a/sheets/s/${s.id}`}" data-go="/s/${s.id}"><span class="hm-ic">${I.grid}</span><span><b>${h(s.title)}</b>${s.shared ? ' <span class="ui-chip is-outline">Link on</span>' : ''}</span></a></td><td class="hm-when">${h(ago(s.updated_at))}</td><td class="end"><button type="button" class="ui-btn is-ghost is-sm" data-row="${s.id}" ${none('opens the menu for this spreadsheet')} aria-label="More for ${h(s.title)}">${I.more}</button></td></tr>`).join('')}</tbody></table></div>`;
     list._sheets = out.sheets;
   }
   load();

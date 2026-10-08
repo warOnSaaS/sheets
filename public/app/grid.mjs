@@ -26,7 +26,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
   };
   root.innerHTML = `<div class="ed${readOnly ? ' is-view' : ''}">
   <header class="ed-top">
-    ${readOnly ? `<a class="ed-brand" href="/" aria-label="Sheets">${I.grid}</a>` : `<a class="ed-back ui-btn is-ghost is-sm" href="#/" aria-label="All spreadsheets">${I.back}</a>`}
+    ${readOnly ? `<a class="ed-brand" href="/" aria-label="Sheets">${I.grid}</a>` : `<a class="ed-back ui-btn is-ghost is-sm" href="${ctx.standalone ? '#/' : '/a/sheets'}" aria-label="All spreadsheets">${I.back}</a>`}
     <form class="ed-title" ${readOnly ? none('shows the title') : tool('sheets.rename_sheet')}><input name="title" aria-label="Spreadsheet title" autocomplete="off" spellcheck="false" ${readOnly ? 'readonly' : ''}></form>
     <div class="ed-who" aria-label="Who else is here"></div>
     <div class="ed-acts">${readOnly ? `<span class="ui-chip is-outline">View only</span><button type="button" class="ui-btn is-accent is-sm" data-act="copy" ${tool('sheets.copy_sheet')}>Make a copy to edit</button>` : `
@@ -51,6 +51,8 @@ export function openEditor(root, ctx, { sheet, view = null }) {
   <footer class="ed-foot"><nav class="ed-tabs" aria-label="Tabs"></nav><div class="ed-stat" aria-live="polite"></div></footer>
 </div>`;
   const $ = (s) => root.querySelector(s);
+  // Inside the suite, links inside the app move with ctx.navigate instead of loading a page.
+  root.addEventListener('click', (e) => { const a = e.target.closest('a.ed-back, a[data-go]'); if (a && !ctx.standalone) { e.preventDefault(); ctx.navigate(a.dataset.go ?? '/'); } });
   const grid = $('.ed-grid'), scroll = $('.sg-scroll'), space = $('.sg-space'), viewEl = $('.sg-view'), uiEl = $('.sg-ui'), input = $('.sg-input'), ac = $('.sg-ac');
   const Q = Object.fromEntries(['body', 'top', 'left', 'corner', 'ch', 'chf', 'rh', 'rhf', 'all'].map((k) => [k, $(`.q-${k}`)]));
   const callTool = (name, inp = {}) => ctx.callTool(name, { sheet: S.sheet, ...inp });
@@ -1310,7 +1312,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
       <label class="ui-field"><span>What</span><select class="ui-select" name="kind"><option value="deals">Deals</option><option value="contacts">Contacts</option><option value="leads">Leads</option><option value="organizations">Organizations</option><option value="activities">Activities</option><option value="soql">A query (SOQL)</option></select></label>
       <label class="ui-field crm-q" hidden><span>Query</span><textarea class="ui-textarea" name="soql" rows="3" placeholder="SELECT Name, StageName, Amount FROM Opportunity WHERE Amount > 5000"></textarea></label>
       <label class="ui-field"><span>Only where <small>optional</small></span><input class="ui-input" name="where" placeholder="Amount > 5000"></label>
-      <label class="ui-field"><span>Tab name</span><input class="ui-input" name="name" placeholder="CRM deals" maxlength="100"></label>` : `<p>No CRM is connected to Sheets yet. ${['owner', 'admin'].includes(ctx.me?.role) ? 'Connect one in <a href="#/settings">Settings</a>.' : 'Ask an admin to connect one in Settings.'}</p>`,
+      <label class="ui-field"><span>Tab name</span><input class="ui-input" name="name" placeholder="CRM deals" maxlength="100"></label>` : `<p>No CRM is connected to Sheets yet. ${['owner', 'admin'].includes(ctx.me?.role) ? `Connect one in <a href="${ctx.standalone ? '#/settings' : '/a/sheets/settings'}" data-go="/settings">Settings</a>.` : 'Ask an admin to connect one in Settings.'}</p>`,
     onSubmit: async (v) => {
       const out = await run('sheets.import_from_crm', v.kind === 'soql' ? { soql: v.soql, name: v.name || undefined } : { kind: v.kind, ...(v.where ? { where: v.where } : {}), name: v.name || undefined });
       if (out) { const t = findTab(S.doc, out.tab); if (t) { S.tab = t.id; layout(); selectCell(0, 0); } toast(`${out.rows} records from the CRM`); }

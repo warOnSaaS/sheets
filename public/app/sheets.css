@@ -7,6 +7,7 @@ html,body{margin:0}
 body{background:var(--ui-bg);color:var(--ui-ink);font-family:var(--ui-font);-webkit-font-smoothing:antialiased}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .sheets-root{height:100svh;display:flex;flex-direction:column;min-height:0}
+.sheets-root.in-suite{height:100%;min-height:calc(100svh - 72px)}
 .sheets-root a:not(.ui-btn){color:inherit}
 
 /* ---------- sign-in gate ---------- */
