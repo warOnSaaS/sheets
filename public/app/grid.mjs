@@ -1093,7 +1093,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
       <label class="ui-field"><span>Show rows where</span><select class="ui-select" name="op"><option value="in"${!cur || cur.op === 'in' ? ' selected' : ''}>The value is ticked below</option>${[['contains', 'Text contains'], ['eq', 'Is equal to'], ['neq', 'Is not equal to'], ['gt', 'Greater than'], ['lt', 'Less than'], ['not_empty', 'Is not empty'], ['empty', 'Is empty']].map(([o, l]) => `<option value="${o}"${cur?.op === o ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
       <input class="ui-input flt-v" name="value" placeholder="Value" value="${h(cur && cur.op !== 'in' ? cur.value ?? '' : '')}">
       <div class="flt-list">${vals.map((x, i) => `<label class="flt-i"><input type="checkbox" name="v${i}" value="${i}"${on(x) ? ' checked' : ''}><span>${h(x.shown || '(empty)')}</span></label>`).join('')}</div>
-      <div class="sh-pop-a"><button type="button" class="ui-btn is-quiet is-sm" data-clear ${tool('sheets.filter')}>Show all</button><button type="submit" class="ui-btn is-accent is-sm">Apply</button></div></form>`, { className: 'is-filter' });
+      <div class="sh-pop-a"><button type="button" class="ui-btn is-quiet is-sm" data-clear ${tool('sheets.filter')}>Show all</button><button type="submit" class="ui-btn is-accent is-sm" ${tool('sheets.filter')}>Apply</button></div></form>`, { className: 'is-filter' });
     const form = p.querySelector('form');
     const sync1 = () => { const op = form.op.value; form.querySelector('.flt-v').hidden = op === 'in' || op === 'empty' || op === 'not_empty'; form.querySelector('.flt-list').hidden = op !== 'in'; };
     form.op.addEventListener('change', sync1); sync1();
@@ -1161,7 +1161,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
     openComment(list[0]);
   }
   function commentHtml(c) {
-    return `<div class="cm" data-cm="${c.id}"><div class="cm-h"><span class="ui-avatar is-sm">${h(initials(c.by?.name))}</span><b>${h(c.by?.name ?? 'Someone')}</b><time>${h(ago(c.at))}</time>${readOnly ? '' : `<button type="button" class="ui-btn is-ghost is-sm" data-resolve="${c.id}" ${tool('sheets.resolve_comment')} title="Resolve">${I.check}</button>`}</div><p>${h(c.body)}</p>${(c.replies ?? []).map((x) => `<div class="cm-r"><b>${h(x.by?.name ?? 'Someone')}</b> <time>${h(ago(x.at))}</time><p>${h(x.body)}</p></div>`).join('')}${readOnly ? '' : `<form class="cm-f" ${tool('sheets.reply_comment')}><input class="ui-input" name="body" placeholder="Reply" required maxlength="5000"><button class="ui-btn is-quiet is-sm" type="submit">Reply</button></form>`}</div>`;
+    return `<div class="cm" data-cm="${c.id}"><div class="cm-h"><span class="ui-avatar is-sm">${h(initials(c.by?.name))}</span><b>${h(c.by?.name ?? 'Someone')}</b><time>${h(ago(c.at))}</time>${readOnly ? '' : `<button type="button" class="ui-btn is-ghost is-sm" data-resolve="${c.id}" ${tool('sheets.resolve_comment')} title="Resolve">${I.check}</button>`}</div><p>${h(c.body)}</p>${(c.replies ?? []).map((x) => `<div class="cm-r"><b>${h(x.by?.name ?? 'Someone')}</b> <time>${h(ago(x.at))}</time><p>${h(x.body)}</p></div>`).join('')}${readOnly ? '' : `<form class="cm-f" ${tool('sheets.reply_comment')}><input class="ui-input" name="body" placeholder="Reply" required maxlength="5000"><button class="ui-btn is-quiet is-sm" type="submit" ${tool('sheets.reply_comment')}>Reply</button></form>`}</div>`;
   }
   function openComment(c) {
     const r = rect(c.r, c.c);
@@ -1190,7 +1190,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
   function commentNew() {
     const r = rect(S.sel.r, S.sel.c);
     const g = grid.getBoundingClientRect();
-    const p = popover(document.body, { x: g.left + r.x + r.w + 6, y: g.top + r.y }, `<form class="cm-new" ${tool('sheets.add_comment')}><p class="ui-label">Comment on ${addr(S.sel.r, S.sel.c)}</p><textarea class="ui-textarea" name="body" rows="3" required maxlength="5000" placeholder="Write a comment"></textarea><div class="sh-pop-a"><button type="button" class="ui-btn is-quiet is-sm" data-x ${none('closes the comment box')}>Cancel</button><button class="ui-btn is-accent is-sm" type="submit">Comment</button></div></form>`, { className: 'is-comment' });
+    const p = popover(document.body, { x: g.left + r.x + r.w + 6, y: g.top + r.y }, `<form class="cm-new" ${tool('sheets.add_comment')}><p class="ui-label">Comment on ${addr(S.sel.r, S.sel.c)}</p><textarea class="ui-textarea" name="body" rows="3" required maxlength="5000" placeholder="Write a comment"></textarea><div class="sh-pop-a"><button type="button" class="ui-btn is-quiet is-sm" data-x ${none('closes the comment box')}>Cancel</button><button class="ui-btn is-accent is-sm" type="submit" ${tool('sheets.add_comment')}>Comment</button></div></form>`, { className: 'is-comment' });
     const f = p.querySelector('form');
     f.body.focus();
     p.querySelector('[data-x]').addEventListener('click', () => { closePop(); focusGrid(); });
@@ -1342,7 +1342,7 @@ export function openEditor(root, ctx, { sheet, view = null }) {
 
   async function historyPanel() {
     const out = await callTool('sheets.list_versions', {});
-    const d = dialog(document.body, { title: 'Version history', cancel: null, submit: 'Done', wide: true, plain: true, body: `<form class="vh-save" ${tool('sheets.save_version')}><input class="ui-input" name="label" placeholder="Name this version, like Before the Q4 update" required maxlength="120"><button class="ui-btn is-quiet" type="submit">Save</button></form>
+    const d = dialog(document.body, { title: 'Version history', cancel: null, submit: 'Done', wide: true, plain: true, body: `<form class="vh-save" ${tool('sheets.save_version')}><input class="ui-input" name="label" placeholder="Name this version, like Before the Q4 update" required maxlength="120"><button class="ui-btn is-quiet" type="submit" ${tool('sheets.save_version')}>Save</button></form>
       <div class="vh-list">${out.versions.map((v) => `<div class="vh-i"><div><b>${h(v.label ?? new Date(v.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}</b><span>${h(v.created_by_name ?? '')}${v.created_by_name ? ' · ' : ''}${h(ago(v.created_at))}${v.auto ? ' · saved automatically' : ''}</span></div><button type="button" class="ui-btn is-ghost is-sm" data-peek="${v.id}" ${tool('sheets.read_range')}>Look</button><button type="button" class="ui-btn is-quiet is-sm" data-restore="${v.id}" ${tool('sheets.restore_version')}>Restore</button></div>`).join('')}</div><div class="vh-peek"></div>` });
     d.querySelector('.vh-save').addEventListener('submit', async (e) => {
       e.preventDefault(); e.stopPropagation();

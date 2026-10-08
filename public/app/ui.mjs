@@ -69,7 +69,7 @@ export function dialog(root, { title, body, toolName, submit = 'Save', cancel = 
   d.className = `ui-dialog sh-dialog${wide ? ' is-wide' : ''}`;
   // A plain dialog holds its own forms (comments, history), so it is not a form itself.
   const wrap = plain ? 'div' : 'form';
-  d.innerHTML = `<${wrap} ${plain ? '' : 'method="dialog" '}class="sh-dform" ${plain ? '' : toolName ? tool(toolName) : none('closes the dialog')}><h3>${h(title)}</h3><div class="sh-dbody">${body}</div><div class="ui-dialog-a">${footer}${cancel ? `<button type="button" class="ui-btn is-quiet" data-close ${none('closes the dialog')}>${h(cancel)}</button>` : ''}${submit ? (plain ? `<button type="button" class="ui-btn is-accent" data-close ${none('closes the dialog')}>${h(submit)}</button>` : `<button type="submit" class="ui-btn is-accent">${h(submit)}</button>`) : ''}</div></${wrap}>`;
+  d.innerHTML = `<${wrap} ${plain ? '' : 'method="dialog" '}class="sh-dform" ${plain ? '' : toolName ? tool(toolName) : none('closes the dialog')}><h3>${h(title)}</h3><div class="sh-dbody">${body}</div><div class="ui-dialog-a">${footer}${cancel ? `<button type="button" class="ui-btn is-quiet" data-close ${none('closes the dialog')}>${h(cancel)}</button>` : ''}${submit ? (plain ? `<button type="button" class="ui-btn is-accent" data-close ${none('closes the dialog')}>${h(submit)}</button>` : `<button type="submit" class="ui-btn is-accent" ${toolName ? tool(toolName) : none('closes the dialog')}>${h(submit)}</button>`) : ''}</div></${wrap}>`;
   root.appendChild(d);
   const form = d.querySelector('.sh-dform');
   d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));
